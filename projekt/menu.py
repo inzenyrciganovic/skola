@@ -1,12 +1,12 @@
 import pygame
 import sys
-
+from main import game_loop
 
 # Inicializace Pygame
 pygame.init()
 
 # Nastavení okna
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = 1600, 900
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Menu s hover efektem")
 
@@ -55,5 +55,7 @@ def main_menu():
                         elif item == "Start":
                             game_loop()  # spustí hru
                         elif item == "Options":
-                            print("Otevřít nastavení...")
+                            screen.fill(BLACK)
 
+if __name__ == "__main__":
+    main_menu()
