@@ -15,6 +15,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 BLUE = (0, 100, 255)
 GRAY = (150, 150, 150)
+RED = (255, 0, 0)
 
 # Font
 font = pygame.font.SysFont(None, 60)
@@ -29,7 +30,7 @@ def draw_menu(mouse_pos):
         text = font.render(item, True, WHITE)
         text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + i * 80))
         if text_rect.collidepoint(mouse_pos):
-            text = font.render(item, True, BLUE)
+            text = font.render(item, True, RED)
         screen.blit(text, text_rect)
     pygame.display.update()
 
@@ -55,7 +56,7 @@ def main_menu():
                         elif item == "Start":
                             game_loop()  # spustí hru
                         elif item == "Options":
-                            screen.fill(BLACK)
+                            print("Otevřít nastavení...")
 
 if __name__ == "__main__":
     main_menu()
