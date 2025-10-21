@@ -6,7 +6,7 @@ from main import game_loop
 pygame.init()
 
 # Nastavení okna
-WIDTH, HEIGHT = 1600, 900
+WIDTH, HEIGHT = 1920, 1080
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Menu s hover efektem")
 

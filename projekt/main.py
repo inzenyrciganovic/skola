@@ -8,8 +8,8 @@ def game_loop():
     pygame.init()
 
     # === OKNO ===
-    WIDTH, HEIGHT = 1600, 900
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    WIDTH, HEIGHT = 1920, 1080
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
     pygame.display.set_caption("Animace pohybu + dash")
 
     # Barvy
@@ -20,21 +20,29 @@ def game_loop():
     def load_animation(path):
         frames = []
         if not os.path.exists(path):
+            print(f"Upozornění: Složka '{path}' neexistuje!")
             return frames
         for filename in sorted(os.listdir(path)):
             if filename.endswith(".png"):
-                frame = pygame.image.load(os.path.join(path, filename)).convert_alpha()
-                frames.append(frame)
+                try:
+                    frame = pygame.image.load(os.path.join(path, filename)).convert_alpha()
+                    frames.append(frame)
+                except Exception as e:
+                    print(f"Chyba při načítání {filename}: {e}")
         return frames
 
     # === NAČTENÍ ANIMACÍ ===
     animations = {
-        "up": load_animation("C:/Users/tomas/Desktop/programecko/projekt/assets/Hráč nahoru"),
-        "down": load_animation("C:/Users/tomas/Desktop/programecko/projekt/assets/Hráč dolu"),
-        "left": load_animation("C:/Users/tomas/Desktop/programecko/projekt/assets/Hráč nalevo"),
-        "right": load_animation("C:/Users/tomas/Desktop/programecko/projekt/assets/Hráč napravo"),
-        "idle": load_animation("C:/Users/tomas/Desktop/programecko/projekt/assets/Hráč Idle")
+        "up": load_animation("programecko/projekt/assets/Hráč nahoru"),
+        "down": load_animation("programecko/projekt/assets/Hráč dolu"),
+        "left": load_animation("programecko/projekt/assets/Hráč nalevo"),
+        "right": load_animation("programecko/projekt/assets/Hráč napravo"),
+        "idle": load_animation("programecko/projekt/assets/Hráč Idle")
     }
+
+    # Debug: výpis načtených animací
+    for key, frames in animations.items():
+        print(f"Načteno {len(frames)} snímků pro '{key}'")
 
     # === HRÁČ ===
     player_x, player_y = WIDTH // 2, HEIGHT // 2
@@ -177,10 +185,20 @@ def game_loop():
             if idle_frames:
                 image = idle_frames[min(current_frame, len(idle_frames) - 1)]
             else:
-                image = animations[direction][0]
+                fallback_frames = animations.get(direction, [])
+                if fallback_frames:
+                    image = fallback_frames[0]
+                else:
+                    image = pygame.Surface((64, 64))
+                    image.fill((255, 0, 0))  # červený fallback obrázek
         else:
             update_animation()
-            image = animations[direction][current_frame]
+            frames = animations.get(direction, [])
+            if frames:
+                image = frames[current_frame]
+            else:
+                image = pygame.Surface((64, 64))
+                image.fill((255, 0, 0))  # červený fallback obrázek
 
         player_rect = pygame.Rect(player_x, player_y, image.get_width(), image.get_height())
         screen.blit(image, (player_x, player_y))
@@ -202,11 +220,10 @@ def game_loop():
 
         # --- DASH COOLDOWN TEXT ---
         time_since_dash = max(0, dash_cooldown - (current_time - last_dash_time))
-        cooldown_text = font.render(f"Dash cooldown: {time_since_dash//1000 + 1}s", True, (0, 0, 0))
+        cooldown_text = font.render(f"Dash cooldown: {time_since_dash//1000 + 2}s", True, (0, 0, 0))
         screen.blit(cooldown_text, (10, 10))
 
         pygame.display.flip()
         clock.tick(60)
 
-    # Když hra skončí, jen ukončí Pygame, ale ne celý program
     pygame.quit()
