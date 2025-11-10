@@ -4,23 +4,11 @@ import random
 import math
 import os
 
-def game_loop():
-    pygame.init()
 
-    # === OKNO ===
-    WIDTH, HEIGHT = 1920, 1080
-    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
-    pygame.display.set_caption("Animace pohybu + dash")
-
-    # Barvy
-    WHITE = (255, 255, 255)
-    BLUE = (0, 0, 255)
-
-    # === FUNKCE NAČTENÍ ANIMACÍ ===
-    def load_animation(path):
+def load_animation(path):
         frames = []
         if not os.path.exists(path):
-            print(f"Upozornění: Složka '{path}' neexistuje!")
+            print(f"Warning: Folder '{path}' does not exist!")
             return frames
         for filename in sorted(os.listdir(path)):
             if filename.endswith(".png"):
@@ -28,23 +16,54 @@ def game_loop():
                     frame = pygame.image.load(os.path.join(path, filename)).convert_alpha()
                     frames.append(frame)
                 except Exception as e:
-                    print(f"Chyba při načítání {filename}: {e}")
+                    print(f"Error loading {filename}: {e}")
         return frames
 
-    # === NAČTENÍ ANIMACÍ ===
+def game_loop():
+    pygame.init()
+
+    # === DIRECTORIES ===
+    BASE_DIR = os.path.dirname(__file__)
+    ASSETS_DIR = os.path.join(BASE_DIR, "assets")
+
+    # === WINDOW ===
+    WIDTH, HEIGHT = 1920, 1080
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
+    pygame.display.set_caption("Animace pohybu + dash")
+
+    # === COLORS ===
+    WHITE = (255, 255, 255)
+    BLUE = (0, 0, 255)
+
+    # === FUNCTION TO LOAD ANIMATION FRAMES ===
+    def load_animation(path):
+        frames = []
+        if not os.path.exists(path):
+            print(f"Warning: Folder '{path}' does not exist!")
+            return frames
+        for filename in sorted(os.listdir(path)):
+            if filename.endswith(".png"):
+                try:
+                    frame = pygame.image.load(os.path.join(path, filename)).convert_alpha()
+                    frames.append(frame)
+                except Exception as e:
+                    print(f"Error loading {filename}: {e}")
+        return frames
+
+    # === LOAD ANIMATIONS ===
     animations = {
-        "up": load_animation("programecko/projekt/assets/Hráč nahoru"),
-        "down": load_animation("programecko/projekt/assets/Hráč dolu"),
-        "left": load_animation("programecko/projekt/assets/Hráč nalevo"),
-        "right": load_animation("programecko/projekt/assets/Hráč napravo"),
-        "idle": load_animation("programecko/projekt/assets/Hráč Idle")
+        "up": load_animation(os.path.join(ASSETS_DIR, "Hráč_nahoru")),
+        "down": load_animation(os.path.join(ASSETS_DIR, "Hráč_dolu")),
+        "left": load_animation(os.path.join(ASSETS_DIR, "Hráč_nalevo")),
+        "right": load_animation(os.path.join(ASSETS_DIR, "Hráč_napravo")),
+        "idle": load_animation(os.path.join(ASSETS_DIR, "Hráč_Idle"))
     }
 
-    # Debug: výpis načtených animací
+    # Debug: print number of frames loaded
     for key, frames in animations.items():
-        print(f"Načteno {len(frames)} snímků pro '{key}'")
+        print(f"Loaded {len(frames)} frames for '{key}'")
 
-    # === HRÁČ ===
+    # === PLAYER ===
     player_x, player_y = WIDTH // 2, HEIGHT // 2
     player_speed = 5
     dash_distance = 200
@@ -64,17 +83,17 @@ def game_loop():
     last_spawn_time = pygame.time.get_ticks()
     enemy_speed = 2
 
-    # === TEXT A CLOCK ===
+    # === TEXT AND CLOCK ===
     font = pygame.font.SysFont(None, 40)
     clock = pygame.time.Clock()
 
-    # === FUNKCE ANIMACE ===
+    # === UPDATE ANIMATION ===
     def update_animation():
         nonlocal current_frame, last_frame_update
         now = pygame.time.get_ticks()
         if now - last_frame_update > frame_delay:
             frames = animations.get(direction, [])
-            if len(frames) > 0:
+            if frames:
                 current_frame = (current_frame + 1) % len(frames)
             last_frame_update = now
 
@@ -82,13 +101,13 @@ def game_loop():
     while running:
         current_time = pygame.time.get_ticks()
 
-        # --- Události ---
+        # --- EVENTS ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-        # --- Pohyb hráče ---
+        # --- PLAYER MOVEMENT ---
         keys = pygame.key.get_pressed()
         moving = False
         dx, dy = 0, 0
@@ -107,14 +126,14 @@ def game_loop():
             dy += 1
             moving = True
 
-        # Normalizace diagonálního pohybu
+        # Normalize diagonal movement
         if dx != 0 or dy != 0:
             length = math.hypot(dx, dy)
             dx, dy = dx / length, dy / length
             player_x += dx * player_speed
             player_y += dy * player_speed
 
-        # --- Směr a stav ---
+        # --- DIRECTION AND STATE ---
         if moving:
             if abs(dx) >= abs(dy):
                 direction = "right" if dx > 0 else "left"
@@ -124,7 +143,7 @@ def game_loop():
         else:
             state = "idle"
 
-        # Reset snímku při změně směru
+        # Reset frame on direction change
         if direction != old_direction:
             current_frame = 0
 
@@ -142,11 +161,11 @@ def game_loop():
                 player_y += dash_dy * dash_distance
                 last_dash_time = current_time
 
-                # Omez hráče na obrazovku
+                # Keep player on screen
                 player_x = max(0, min(WIDTH - 64, player_x))
                 player_y = max(0, min(HEIGHT - 64, player_y))
 
-                # Dash zabíjí enemy
+                # Dash kills enemies
                 dash_rect = pygame.Rect(min(start_x, player_x), min(start_y, player_y),
                                         abs(player_x - start_x) + 64,
                                         abs(player_y - start_y) + 64)
@@ -154,11 +173,11 @@ def game_loop():
                     if dash_rect.colliderect(enemy['rect']):
                         enemies.remove(enemy)
 
-        # --- OMEZENÍ POHYBU ---
+        # --- BOUNDARY CHECK ---
         player_x = max(0, min(WIDTH - 64, player_x))
         player_y = max(0, min(HEIGHT - 64, player_y))
 
-        # --- SPAWN ENEMY ---
+        # --- SPAWN ENEMIES ---
         if current_time - last_spawn_time > enemy_spawn_delay:
             side = random.choice(['top', 'bottom', 'left', 'right'])
             if side == 'top':
@@ -176,10 +195,10 @@ def game_loop():
             enemies.append({'rect': pygame.Rect(x, y, enemy_size, enemy_size)})
             last_spawn_time = current_time
 
-        # --- VYKRESLENÍ ---
+        # --- DRAWING ---
         screen.fill(WHITE)
 
-        # --- ANIMACE PODLE STAVU ---
+        # Animation frame selection
         if state == "idle":
             idle_frames = animations.get("idle", [])
             if idle_frames:
@@ -190,7 +209,7 @@ def game_loop():
                     image = fallback_frames[0]
                 else:
                     image = pygame.Surface((64, 64))
-                    image.fill((255, 0, 0))  # červený fallback obrázek
+                    image.fill((255, 0, 0))
         else:
             update_animation()
             frames = animations.get(direction, [])
@@ -198,12 +217,12 @@ def game_loop():
                 image = frames[current_frame]
             else:
                 image = pygame.Surface((64, 64))
-                image.fill((255, 0, 0))  # červený fallback obrázek
+                image.fill((255, 0, 0))
 
         player_rect = pygame.Rect(player_x, player_y, image.get_width(), image.get_height())
         screen.blit(image, (player_x, player_y))
 
-        # --- ENEMY POHYB ---
+        # --- ENEMY MOVEMENT ---
         for enemy in enemies[:]:
             enemy_rect = enemy['rect']
             ex, ey = player_x - enemy_rect.x, player_y - enemy_rect.y
@@ -218,12 +237,17 @@ def game_loop():
                 print("Game Over!")
                 running = False
 
-        # --- DASH COOLDOWN TEXT ---
+        # --- DASH COOLDOWN DISPLAY ---
         time_since_dash = max(0, dash_cooldown - (current_time - last_dash_time))
-        cooldown_text = font.render(f"Dash cooldown: {time_since_dash//1000 + 2}s", True, (0, 0, 0))
+        cooldown_text = font.render(f"Dash cooldown: {time_since_dash/1000}s", True, (0, 0, 0))
         screen.blit(cooldown_text, (10, 10))
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
+
+
+# To run the game directly
+if __name__ == "__main__":
+    game_loop()

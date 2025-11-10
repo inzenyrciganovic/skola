@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stránka s navigací</title>
     <style>
-        /* --- 1. KEYFRAMES --- */
+        /* --- FONT FACE --- */
+        @font-face {
+            font-family: 'Font1';
+            src: url('Font1.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        /* --- 1. GLOW AND BACKGROUND ANIMATION KEYFRAMES --- */
         @keyframes slowZoom {
             0% { background-size: 110%; }
             100% { background-size: 100%; }
@@ -15,27 +23,18 @@
             0% { box-shadow: 0 0 5px rgba(195, 14, 34, 0.4); }
             100% { box-shadow: 0 0 20px rgba(195, 14, 34, 0.8), 0 0 25px rgba(195, 14, 34, 0.4); }
         }
-        
-        /* --- 2. FONT --- */
-        @font-face {
-            font-family: 'Font1';
-            src: url('Font1.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
 
-        /* --- 3. BASE STYLES & BACKGROUND EFFECT --- */
+        /* --- 2. BASE STYLES & ANIMATIONS APPLICATION --- */
         body {
             margin: 0;
             background-image: url(background.png);
             color: white;
-            /* Added Subtle Background Animation */
+            /* Subtle Background Animation */
             background-size: 110%; 
             background-position: center;
             animation: slowZoom 60s infinite alternate; 
         }
 
-        /* --- 4. NAVBAR & GLOW EFFECT --- */
         .navbar {
             position: fixed;
             top: 0;
@@ -51,15 +50,29 @@
             -webkit-backdrop-filter: blur(5.4px);
             box-sizing: border-box;
             z-index: 1000;
-            /* Applied Glow/Pulse Effect */
+            /* Glow/Pulse Effect */
             animation: glowPulse 2s infinite alternate; 
         }
 
-        .navbar .logo {
-            height: 50px;
-            width: auto;
+        .content {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 100px;
+            border-radius: 30px;
+            border: 2px solid #c30e22;
+            background: rgba(46, 45, 42, 0.51);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5.4px);
+            -webkit-backdrop-filter: blur(5.4px);
+            max-width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            /* Glow/Pulse Effect */
+            animation: glowPulse 2s infinite alternate; 
         }
 
+        /* --- 3. DYNAMIC UNDERLINE & LIFT EFFECT --- */
+        
         .navbar .nav-links {
             display: flex;
             gap: 15px;
@@ -68,17 +81,17 @@
             transform: translateX(-50%);
         }
 
-        /* --- 5. NAV LINKS & DYNAMIC UNDERLINE --- */
+        /* Underline Setup */
         .navbar .nav-links a {
             text-decoration: none;
             color: #c30e22;
             padding: 8px 12px;
-            border-radius: 0; /* Changed for underline effect */
+            border-radius: 0; 
             transition: color 0.3s; 
             white-space: nowrap;
             font-family: 'Font1';
-            position: relative; /* Setup for ::after */
-            padding-bottom: 5px; /* Space for the underline */
+            position: relative; /* Container for the line */
+            padding-bottom: 5px; 
             overflow: hidden; 
         }
 
@@ -95,48 +108,67 @@
         }
 
         .navbar .nav-links a:hover::after {
-            transform: translateX(0); 
+            transform: translateX(0); /* Slide in */
         }
 
         .navbar .nav-links a:hover {
             background-color: transparent; 
             color: white; 
         }
-
-        /* --- 6. CONTENT & GLOW EFFECT --- */
-        .content {
-            text-align: center;
-            padding: 40px 20px;
-            margin-top: 100px;
-            border-radius: 30px;
-            border: 2px solid #c30e22;
-            background: rgba(46, 45, 42, 0.51);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(5.4px);
-            -webkit-backdrop-filter: blur(5.4px);
-            max-width: 60%;
-            margin-left: auto;
-            margin-right: auto;
-            /* Applied Glow/Pulse Effect */
-            animation: glowPulse 2s infinite alternate; 
+        
+        /* Lift Effect */
+        .accountbutton {
+            position: absolute;
+            right: 20px;
+            display: inline-block;
+            cursor: pointer;
+            transition: transform 0.3s ease; /* Lift transition */
         }
+
+        .accountbutton:hover {
+            transform: translateY(-3px); /* Subtle vertical lift */
+        }
+
+        /* --- 4. DROPDOWN FADE/SLIDE TRANSITION (The fixed logic) --- */
+        
+        .dropdown-content {
+            /* Initial State (Hidden smoothly) */
+            visibility: hidden; 
+            opacity: 0;
+            transform: translateY(10px); 
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+
+            /* Static position and style */
+            position: absolute;
+            right: 0;
+            background-color: #2e2d2a;
+            border: 2px solid #c30e22;
+            border-radius: 12px;
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5); 
+            z-index: 1001;
+        }
+
+        .accountbutton:hover .dropdown-content {
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0); /* Slides up into place */
+        }
+
+        /* --- 5. ORIGINAL STYLES (Kept for completeness) --- */
+
+        .navbar .logo { height: 50px; width: auto; }
 
         .content h1 {
             color: #c30e22;
             font-family: 'Font1';
         }
 
-        /* --- 7. ACCOUNT BUTTON & LIFT EFFECT --- */
-        .accountbutton {
-            position: absolute;
-            right: 20px;
-            display: inline-block;
-            cursor: pointer;
-            transition: transform 0.3s ease; /* For lift effect */
-        }
-
-        .accountbutton:hover {
-            transform: translateY(-3px); /* Subtle vertical lift */
+        .content img {
+            max-width: 100%; 
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 15px; 
         }
 
         .accountbutton img.account {
@@ -157,25 +189,6 @@
             vertical-align: middle;
         }
 
-        /* --- 8. DROPDOWN CONTENT (Cleaned Transition) --- */
-        .dropdown-content {
-            /* Initial State (Hidden but ready to transition) */
-            visibility: hidden; /* Fix for broken effect: uses visibility instead of display */
-            opacity: 0;
-            transform: translateY(10px); /* Starts slightly below for a nice slide-in */
-            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-
-            /* Static position and style */
-            position: absolute;
-            right: 0;
-            background-color: #2e2d2a;
-            border: 2px solid #c30e22;
-            border-radius: 12px;
-            min-width: 160px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5); 
-            z-index: 1001;
-        }
-
         .dropdown-content a {
             color: #c30e22;
             padding: 10px 16px;
@@ -188,14 +201,6 @@
         .dropdown-content a:hover {
             background-color: white;
             color: #333;
-        }
-
-        /* Zobrazení při hover (Fixed) */
-        .accountbutton:hover .dropdown-content {
-            /* Final State (Visible) */
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0); /* Slides up into place */
         }
 
         /* Responsivní menší obrazovky */
@@ -239,14 +244,10 @@
     </div>
 
     <div class="content">
-        <h1>WELCOME</h1>
-        <p>Það sem þú ert að lesa núna er íslenska.
-            Hún er fornnorrænt tungumál með fjölmörgum beygingum og hreim sem minnir á álfa, fjalla og ísöld.
-
-            Dæmi:
-            „Ég hef séð hvernig speglar brotna í öllum hornum heimsins.
-            Þessir orðflutningar eru eins og regnbogar yfir fossi –
-            óhandfanglegir, fallegir og fullir vonar.“</p>
+        <h1>ER-DIAGRAM NAVRH PROJEKTU</h1>
+        <img src="ERdiagram.png">
+        <h1>DIAGRAM NA POHYB</h1>
+        <img src="Pohybdiagram.jpg">
     </div>
 
 </body>
