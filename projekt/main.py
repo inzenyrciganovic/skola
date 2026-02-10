@@ -239,7 +239,11 @@ def game_loop():
 
         # --- DASH COOLDOWN DISPLAY ---
         time_since_dash = max(0, dash_cooldown - (current_time - last_dash_time))
+<<<<<<< HEAD
         cooldown_text = font.render(f"Dash cooldown: {time_since_dash/1000}s", True, (0, 0, 0))
+=======
+        cooldown_text = font.render(f"Dash cooldown: {time_since_dash//10000 + 2}s", True, (0, 0, 0))
+>>>>>>> 0a4f2d9 (pokus)
         screen.blit(cooldown_text, (10, 10))
 
         pygame.display.flip()
